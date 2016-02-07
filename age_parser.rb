@@ -22,25 +22,16 @@ class AgeParser < Parser
 	end
 
 	def parse
-
-	
-		if contains_token?(TokenConstants::AGE_TOKENS)
-			str = gulp_token(TokenConstants::AGE_TOKENS)
-			str.slice! "age"
-			str.strip!
-			tok = AgeToken.new
-			case str[0]
-			when ">", "<"
-				tok.operator = str[0]
-			else
-				raise AgeParserException.new('Unexpected operator for row: ' + @row.id) 
-			end
-			str.slice! 0
-			str.strip!
-			tok.age = Integer(str)
-			tokens.push tok
-		else
+		if not conditions.match(TokenConstants::AGE_REGEX)
 			return false
 		end
+		
+		str = gulp_token(TokenConstants::AGE_REGEX)
+
+		tok = AgeToken.new
+		tok.operator = str[/\<|\>/]
+		tok.age = Integer(str[/\d+/])
+		
+		tokens.push tok
 	end
 end

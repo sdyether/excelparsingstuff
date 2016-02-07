@@ -24,7 +24,7 @@ class Parser
 	def initialize(row)
 		@row = row
 		@conditions = row.condition.format
-		TOP_LEVEL_SPLITTERS.each { |s| if @conditions.include? s then  @conditions = @conditions.split(s).format end }
+		TOP_LEVEL_SPLITTERS.each { |s| if @conditions.include? s then  @conditions = @conditions.split(s).format.join end }
 		@tokens = []
 	end
 	
@@ -34,31 +34,12 @@ class Parser
 		p tokens
 		puts
 	end
-	
-	def contains_token?(token_struct)
-		@conditions.each do |cond|
-			token_struct.each do |token|
-				if cond.downcase.include? token.downcase
-					return true
-				end
-			end
-		end
-		
-		return false
-	end
-	
+
 	#remove and return
-	def gulp_token(token_struct)
-		@conditions.each do |cond|
-			token_struct.each do |token|
-				if cond.downcase.include? token.downcase
-					#delete token, leftover AND, and return string token
-					@conditions.delete cond
-					@conditions.format
-					return cond.downcase
-				end
-			end
-		end
+	def gulp_token(regex)
+		str = conditions[regex]
+		conditions.gsub(regex, '')
+		conditions.format
 	end
 
 end
