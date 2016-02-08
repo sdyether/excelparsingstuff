@@ -1,11 +1,8 @@
 require 'spreadsheet'
 require_relative 'erow'
 require_relative 'age_parser'
+require_relative 'occ_parser'
 require_relative 'validator'
-
-# Globals
-
-TOP_LEVEL_SPLITTERS = ["AND", "And"] 
 
 ### Helper Methods:
 
@@ -16,29 +13,6 @@ class Enum
 	
 	def self.values
 		return @values ||= constants.map { |const| const_get(const) }
-	end
-end
-
-class String
-	#compress newlines, tabs, successive spaces, leading and trailing whitespace/ANDS
-	def format
-		str = self.gsub(/\n/," ").gsub(/\t/," ").squeeze(" ").strip
-		TOP_LEVEL_SPLITTERS.each do |splitter| 
-			if str.start_with? splitter or str.end_with? splitter
-				str.slice! splitter
-			end
-		end
-		return str.strip
-	end
-	
-	def format!
-		replace(format)
-	end
-end
-
-class Array
-	def format
-		self.each { |a| a.format! if a.respond_to? :format! }
 	end
 end
 
@@ -60,20 +34,63 @@ class Category < Enum
 end
 
 class TokenConstants < Enum
-	AGE_REGEX = /Age\s*(\<|\>)\s*\d+/i
+
+	INITIAL_CLEANUP = { 
+	/\n/ => " ", 				#newlines
+	/\t/ => " ",				#tabs
+	/\s{2,}/ => " ",			#successive spaces
+	/\s+and\s+/i => " ",		#condition delimiter
+	/home duties/i => "HD" }	#stray occ code
+
+	AGE_REGEX = /\sAge\s*(\(\w*\))?(<|>)\s*\d+/i
 	AGE_INT_REF = "dummy.age.ref"
 	
-	#todo monday - move these into constants class, do occ letter regex
-	OCC_REGEX = ["Occ_Letter=", "Occ_Letter<>"]
-	OCC_LETTER_INT_REF = "dummy.occ.letter"
+	OCC_TPD_REGEX = /Occ_TPDLetter\s*(=|<>)\s*[A-Z]+\s*(,\s*[A-Z]+\s*)*(or\s*[A-Z]+\s*)*/i
+	OCC_REGEX = /Occ_Letter\s*(=|<>)\s*[A-Z]+\s*(,\s*[A-Z]+\s*)*(or\s*[A-Z]+\s*)*/i
+	OCC_INT_REF = "dummy.occ.letter"
 end
 
+class Tests
 
+	def self.test_age_parser
+		v = Validator.new
+		v.rows.each do |row|
+			p = AgeParser.new(row)
+			if p.conditions[/\sAge/i] and not p.parse then printfail(p) end
+		end
+	end
+
+	def self.test_occ
+		v = Validator.new
+		v.rows.each do |row|
+			p = OccParser.new(row)
+			if p.conditions[/occ.*letter/i] and not p.parse then printfail(p) end
+		end
+	end
+
+	def self.test_and_split
+		v = Validator.new
+		v.rows.each do |row|
+			p = Parser.new(row)
+			if p.conditions[/and/i] then printfail(p) end
+		end
+	end
+	
+	def run_all_tests
+		test_occ
+		test_and_split
+		test_age_parser
+	end
+	
+	def self.printfail(parser)
+		print "Error parsing: (" + caller_locations(1,1)[0].label + ")\n" + parser.row.id + "\n" +  parser.conditions + "\n\n" 
+	end
+
+end
+
+#Tests.run_all_tests
 
 v = Validator.new
-
-epic_fails = []
-#start processing rows
 v.rows.each do |row|
 	
 	case row.get_category
@@ -82,10 +99,13 @@ v.rows.each do |row|
 		if not ap.parse
 			epic_fails.push(row.id)
 		end
+	when Category::MAXIMUM_SUM_INSURED
+		
+
 	end
 end
 
-p epic_fails
+
 
 
 

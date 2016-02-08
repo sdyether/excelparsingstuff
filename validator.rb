@@ -35,6 +35,7 @@ class Validator
 	def print_errors
 		print "The following spreadsheet rows did not contain sufficient data:\n"
 		p error_rows
+		puts
 	end
 
 	def row_malformed?(row)
