@@ -1,7 +1,6 @@
 require 'spreadsheet'
 require_relative 'erow'
-require_relative 'age_parser'
-require_relative 'occ_parser'
+require_relative 'parser'
 require_relative 'validator'
 
 ### Helper Methods:
@@ -39,10 +38,12 @@ class TokenConstants < Enum
 	/\n/ => " ", 				#newlines
 	/\t/ => " ",				#tabs
 	/\s{2,}/ => " ",			#successive spaces
+	/&/ => ",",					#ampersand in occ code lists
 	/\s+and\s+/i => " ",		#condition delimiter
 	/home duties/i => "HD" }	#stray occ code
 
-	AGE_REGEX = /\sAge\s*(\(\w*\))?(<|>)\s*\d+/i
+	AGE_BENEFIT_REGEX = /(\A|\s)Age\s*(\(\w*\))+(<|>)\s*\d+/i
+	AGE_REGEX = /(\A|\s)Age\s*(<|>)\s*\d+/i
 	AGE_INT_REF = "dummy.age.ref"
 	
 	OCC_TPD_REGEX = /Occ_TPDLetter\s*(=|<>)\s*[A-Z]+\s*(,\s*[A-Z]+\s*)*(or\s*[A-Z]+\s*)*/i
@@ -91,19 +92,24 @@ end
 #Tests.run_all_tests
 
 v = Validator.new
+parsers = []
 v.rows.each do |row|
-	
-	case row.get_category
-	when Category::MINIMUM_ENTRY_AGE, Category::MAXMIUM_ENTRY_AGE
-		ap = AgeParser.new(row)
-		if not ap.parse
-			epic_fails.push(row.id)
-		end
-	when Category::MAXIMUM_SUM_INSURED
-		
 
-	end
+	p = Parser.new(row)
+	p.parse_age
+	p.parse_occ
+	#p.print
+	
+	
+	#case row.get_category
+	#when Category::MINIMUM_ENTRY_AGE, Category::MAXMIUM_ENTRY_AGE
+
+		
+	parsers.push p	
+
 end
+
+parsers.each { |x| puts x.row.id + " " + x.conditions }
 
 
 

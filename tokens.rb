@@ -9,9 +9,12 @@ end
 class OccToken < Token
 	attr_accessor :operator, :letters
 	
+	VALID_OCC_LETTERS = ["AAA", "AA", "A", "B", "C", "D", "E", "HD"]
+	
 	def initialize(operator = nil, letters = [])
 		super(TokenConstants::OCC_INT_REF)
 		@operator = operator
+		letters.each { |l| if not VALID_OCC_LETTERS.contains?(l) then raise "Invalid Occupation letter" end }
 		@letters = letters
 	end
 	
