@@ -1,3 +1,5 @@
+require_relative 'parser_exception'
+
 class Token
 	attr_accessor :interface_reference
 
@@ -6,16 +8,26 @@ class Token
 	end
 end
 
+class BenefitToken < Token
+	attr_accessor :name
+end
+
 class OccToken < Token
-	attr_accessor :operator, :letters
+	attr_accessor :operator
+	attr_reader :letters
 	
 	VALID_OCC_LETTERS = ["AAA", "AA", "A", "B", "C", "D", "E", "HD"]
 	
 	def initialize(operator = nil, letters = [])
 		super(TokenConstants::OCC_INT_REF)
 		@operator = operator
-		letters.each { |l| if not VALID_OCC_LETTERS.contains?(l) then raise "Invalid Occupation letter" end }
 		@letters = letters
+	end
+	
+	def letters=(letters)
+		letters.each do |l| 
+			if not VALID_OCC_LETTERS.include?(l) then raise ParserException.new "Invalid Occupation letter" end 
+		end
 	end
 	
 end

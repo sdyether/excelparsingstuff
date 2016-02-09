@@ -2,16 +2,6 @@ require_relative 'tokens'
 
 class Parser
 	
-	class ParserException < StandardError
-		def initialize(msg)
-			@message = msg
-		end
-		
-		def message
-			return @message
-		end
-	end
-	
 	#break conditions down as we turn string array into token objects
 	attr_accessor :conditions, :row, :tokens, :dont_parse
 		
@@ -23,9 +13,20 @@ class Parser
 		@dont_parse = false
 	end
 	
+	def parse_single_benefit
+		if not conditions.match(TokenConstants::SINGLE_BENEFIT_REGEX)
+			return false
+		end
+		
+		str = gulp_token(TokenConstants::SINGLE_BENEFIT_REGEX)
+		tok = BenefitToken.new
+		tok.name = str
+		tokens.push tok
+		
+	end
+	
 	def parse_age
-		
-		
+
 		#don't support Age(benefit)<x
 		if conditions.match(TokenConstants::AGE_BENEFIT_REGEX)
 			@dont_parse = true
@@ -56,8 +57,7 @@ class Parser
 		tok = OccToken.new
 		tok.operator = str[/(=|<>)/]
 		#parse occupation letters
-		occs = str.gsub(/Occ.*Letter\s*(=|<>)\s*/i, "").gsub(/or/i, " ").gsub(/&/, " ").gsub(/,/, " ").gsub(/\s{2,}/,  " ").split(" ")
-		occs.each { |o| tok.letters.push(o) }
+		tok.letters = str.gsub(/Occ.*Letter\s*(=|<>)\s*/i, "").gsub(/or/i, " ").gsub(/&/, " ").gsub(/,/, " ").gsub(/\s{2,}/,  " ").split(" ")
 		tokens.push tok
 	end
 	
@@ -68,6 +68,10 @@ class Parser
 		puts
 	end
 
+	def finished?
+		conditions[/\A\s*\z/]
+	end
+	
 	#remove and return
 	def gulp_token(regex)
 		str = conditions[regex]
