@@ -43,6 +43,8 @@ class TokenConstants < Enum
 	OCC_REGEX = /Occ_Letter\s*(=|<>)\s*[A-Z]+\s*(,\s*[A-Z]+\s*)*(or\s*[A-Z]+\s*)*/i
 	OCC_INT_REF = "dummy.occ.letter"
 	
-	SINGLE_BENEFIT_REGEX = /[A-Za-z0-9\(\)\+]+/
+	SINGLE_BENEFIT_REGEX = /\A[A-Za-z0-9][A-Za-z0-9\(\)\+]+\z/
+	
+	PREMIUM_REGEX = /Premium Type\s*(=|<>)\s*\w+/i
 	
 end

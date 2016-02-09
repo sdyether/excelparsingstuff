@@ -18,6 +18,12 @@ v.rows.each do |row|
 		
 		p.parse_age
 		p.parse_occ
+		p.parse_premium
+		
+		if p.finished? 
+			parsers.push p 
+			next 
+		end
 		#p.print
 	
 		if p.dont_parse 
@@ -27,14 +33,17 @@ v.rows.each do |row|
 		
 		case row.get_category
 		when Category::MINIMUM_ENTRY_AGE, Category::MAXMIUM_ENTRY_AGE, Category::OCCUPATIONS
-			if  p.parse_single_benefit and p.finished?
-				parsers.push p
-			else
-				cant_parse.push(p.row.id)
-				next
-			end
+			p.parse_single_benefit
+		when Category::MAXIMUM_SUM_INSURED
+			p.parse_max_sum
 		end
 	
+		#finally
+		if p.finished? 
+			parsers.push p
+		else
+			cant_parse.push(p.row.id)
+		end
 		
 	rescue ParserException
 		cant_parse.push(p.row.id)
@@ -43,6 +52,7 @@ v.rows.each do |row|
 
 end
 
+puts "Total: " + v.rows.size.to_s + "(" + (cant_parse.size + parsers.size).to_s + ") | Couldn't parse: " + cant_parse.size.to_s + " | Parsed: " + parsers.size.to_s + " (" + (100 * parsers.size/v.rows.size.to_f).round(2).to_s + "%)"
 puts "Can't Parse:"
 puts cant_parse
 puts "=" * 100

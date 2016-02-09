@@ -14,7 +14,7 @@ class Parser
 	end
 	
 	def parse_single_benefit
-		if not conditions.match(TokenConstants::SINGLE_BENEFIT_REGEX)
+		if not conditions[TokenConstants::SINGLE_BENEFIT_REGEX]
 			return false
 		end
 		
@@ -25,15 +25,29 @@ class Parser
 		
 	end
 	
+	def parse_premium
+		if not conditions[TokenConstants::PREMIUM_REGEX]
+			return false
+		end
+		
+		str = gulp_token(TokenConstants::PREMIUM_REGEX)
+		
+		tok = PremiumToken.new
+		tok.operator = str[/(=|<>)/]
+		str.gsub!(/Premium Type\s*(=|<>)\s*/i, "")
+		tok.name = str.strip
+		tokens.push tok
+	end
+	
 	def parse_age
 
 		#don't support Age(benefit)<x
-		if conditions.match(TokenConstants::AGE_BENEFIT_REGEX)
+		if conditions[TokenConstants::AGE_BENEFIT_REGEX]
 			@dont_parse = true
 			return true 
 		end
 		
-		if not conditions.match(TokenConstants::AGE_REGEX)
+		if not conditions[TokenConstants::AGE_REGEX]
 			return false
 		end
 
@@ -46,9 +60,9 @@ class Parser
 	end
 
 	def parse_occ
-		if conditions.match(TokenConstants::OCC_REGEX)
+		if conditions[TokenConstants::OCC_REGEX]
 			str = gulp_token(TokenConstants::OCC_REGEX)
-		elsif conditions.match(TokenConstants::OCC_TPD_REGEX)
+		elsif conditions[TokenConstants::OCC_TPD_REGEX]
 			str = gulp_token(TokenConstants::OCC_TPD_REGEX)
 		else
 			return false
@@ -76,6 +90,7 @@ class Parser
 	def gulp_token(regex)
 		str = conditions[regex]
 		conditions.gsub!(regex, " ")
+		conditions.strip!
 		return str
 	end
 

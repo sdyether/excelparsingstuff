@@ -12,6 +12,10 @@ class BenefitToken < Token
 	attr_accessor :name
 end
 
+class PremiumToken < Token
+	attr_accessor :operator, :name
+end
+
 class OccToken < Token
 	attr_accessor :operator
 	attr_reader :letters
