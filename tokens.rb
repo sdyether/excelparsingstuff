@@ -16,6 +16,10 @@ class PremiumToken < Token
 	attr_accessor :operator, :name
 end
 
+class MaxSumToken < Token
+	attr_accessor :cover, :amount #maybe make this int?
+end
+
 class OccToken < Token
 	attr_accessor :operator
 	attr_reader :letters
@@ -29,9 +33,12 @@ class OccToken < Token
 	end
 	
 	def letters=(letters)
+		if not letters.is_a? Array then raise "Expected an array" end
+		
 		letters.each do |l| 
 			if not VALID_OCC_LETTERS.include?(l) then raise ParserException.new "Invalid Occupation letter" end 
 		end
+		@letters = letters
 	end
 	
 end

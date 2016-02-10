@@ -18,13 +18,14 @@ v.rows.each do |row|
 		
 		p.parse_age
 		p.parse_occ
+		
 		p.parse_premium
 		
 		if p.finished? 
 			parsers.push p 
 			next 
 		end
-		#p.print
+		
 	
 		if p.dont_parse 
 			cant_parse.push(p.row.id)
@@ -37,6 +38,8 @@ v.rows.each do |row|
 		when Category::MAXIMUM_SUM_INSURED
 			p.parse_max_sum
 		end
+	
+	#p.print
 	
 		#finally
 		if p.finished? 

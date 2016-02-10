@@ -58,6 +58,21 @@ class Parser
 		tok.age = Integer(str[/\d+/])
 		tokens.push tok
 	end
+	
+	def parse_max_sum
+		if not conditions[TokenConstants::MAX_SUM_REGEX]
+			return false
+		end
+		
+		str = gulp_token(TokenConstants::MAX_SUM_REGEX)
+		
+		tok = MaxSumToken.new
+		tok.cover = str[/\A[A-Za-z0-9]+[A-Za-z0-9\(\)\+]*/]
+		str.gsub!(/[A-Za-z0-9]+[A-Za-z0-9\(\)\+]*(\s|:)?Cover\s*>[\s$]*/i, "")
+		tok.amount = str.strip
+		tokens.push tok
+		
+	end
 
 	def parse_occ
 		if conditions[TokenConstants::OCC_REGEX]

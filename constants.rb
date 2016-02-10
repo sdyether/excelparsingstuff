@@ -47,4 +47,6 @@ class TokenConstants < Enum
 	
 	PREMIUM_REGEX = /Premium Type\s*(=|<>)\s*\w+/i
 	
+	MAX_SUM_REGEX = /[A-Za-z0-9]+[A-Za-z0-9\(\)\+]*(\s|:)?Cover\s*>[\s$]*[0-9][,0-9]*/i
+	
 end
